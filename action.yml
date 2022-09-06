@@ -13,16 +13,19 @@ runs:
   using: "composite"
   steps:
       - name: Get SHA of the branch off point
+        shell: bash
         id: old_apk_sha
         run: |-
           git fetch origin main
           echo "::set-output name=old_apk_sha::$(git merge-base --all ${{ github.event.pull_request.head.sha }} origin/main)"      
 
       - name: Logging branch off SHA
+        shell: bash
         run: |-
           echo "The branch off SHA: ${{ steps.old_apk_sha.outputs.old_apk_sha }}"
 
       - name: Download APK
+        shell: bash
         run: |-
           brew install jq
           artifactDownloadUrl=$(curl \
@@ -39,6 +42,7 @@ runs:
           unzip -d `dirname $IN` $IN
 
       - name: Diff APKs
+        shell: bash
         id: diff_apk
         run: |-
           brew install JakeWharton/repo/diffuse
