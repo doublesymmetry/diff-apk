@@ -1,0 +1,74 @@
+name: "Diff APK"
+description: "View changes between different versions of APK"
+
+inputs:
+  github_token:
+    description: "Github Token from Secrets"
+    required: true
+  new_apk:
+    description: "Path to the new apk"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+      - name: Get SHA of the branch off point
+        shell: bash
+        id: old_apk_sha
+        run: |-
+          git fetch origin main
+          echo "::set-output name=old_apk_sha::$(git merge-base --all ${{ github.event.pull_request.head.sha }} origin/main)"      
+
+      - name: Logging branch off SHA
+        shell: bash
+        run: |-
+          echo "The branch off SHA: ${{ steps.old_apk_sha.outputs.old_apk_sha }}"
+
+      - name: Download APK
+        shell: bash
+        run: |-
+          brew install jq
+          artifactDownloadUrl=$(curl \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ inputs.github_token }}" \
+            https://api.github.com/repos/${{ github.repository }}/actions/artifacts \
+          | jq -M -r '.artifacts[] | select(.workflow_run.head_sha == "${{ steps.old_apk_sha.outputs.old_apk_sha }}").archive_download_url')
+          curl \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ inputs.github_token }}" \
+            --create-dirs --output-dir downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }} -o zip\
+            -L $artifactDownloadUrl
+          IN=downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/zip
+          unzip -d `dirname $IN` $IN
+
+      - name: Diff APKs
+        shell: bash
+        id: diff_apk
+        run: |-
+          brew install JakeWharton/repo/diffuse
+          diffuse diff downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/*.apk ${{ inputs.new_apk }}
+          DIFFUSE_OUTPUT=$(diffuse diff downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/*.apk ${{ inputs.new_apk }})
+          DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//'%'/'%25'}"
+          DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//$'\n'/'%0A'}"
+          DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//$'\r'/'%0D'}"
+          echo "::set-output name=diff_details::$DIFFUSE_OUTPUT"
+
+      - name: Find Comment
+        uses: peter-evans/find-comment@v2
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: APK Diff Details
+
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            APK Diff Details
+            ```
+            ${{ steps.diff_apk.outputs.diff_details }} 
+            ```
+          edit-mode: replace
