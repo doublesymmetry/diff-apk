@@ -52,6 +52,16 @@ runs:
           DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//$'\n'/'%0A'}"
           DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//$'\r'/'%0D'}"
           echo "::set-output name=diff_details::$DIFFUSE_OUTPUT"
+      
+      - name: Get workflow run job url
+        id: get_run_job_url
+        run: |-
+          workflowRunJobUrl=$(curl \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          "${{ github.api_url }}/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
+          | jq -M -r '.jobs[] | select(.name == "${{ github.job }}").html_url')
+          echo "::set-output name=workflow_run_job_url::$workflowRunJobUrl"      
 
       - name: Find Comment
         uses: peter-evans/find-comment@v2
@@ -71,4 +81,5 @@ runs:
             ```
             ${{ steps.diff_apk.outputs.diff_details }} 
             ```
+            More detailed logs can be found here --> ${{ steps.get_run_job_url.outputs.workflow_run_job_url }}
           edit-mode: replace
