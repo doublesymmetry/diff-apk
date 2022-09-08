@@ -58,7 +58,7 @@ runs:
         run: |-
           workflowRunJobUrl=$(curl \
           -H "Accept: application/vnd.github+json" \
-          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Authorization: Bearer ${{ inputs.github_token }}" \
           "${{ github.api_url }}/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
           | jq -M -r '.jobs[] | select(.name == "${{ github.job }}").html_url')
           echo "::set-output name=workflow_run_job_url::$workflowRunJobUrl"      
