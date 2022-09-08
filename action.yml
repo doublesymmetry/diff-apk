@@ -54,6 +54,7 @@ runs:
           echo "::set-output name=diff_details::$DIFFUSE_OUTPUT"
       
       - name: Get workflow run job url
+        shell: bash
         id: get_run_job_url
         run: |-
           workflowRunJobUrl=$(curl \
