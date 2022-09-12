@@ -47,11 +47,22 @@ runs:
         run: |-
           brew install JakeWharton/repo/diffuse
           diffuse diff downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/*.apk ${{ inputs.new_apk }}
-          DIFFUSE_OUTPUT=$(diffuse diff downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/*.apk ${{ inputs.new_apk }})
+          DIFFUSE_OUTPUT=$(diffuse diff downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/*.apk ${{ inputs.new_apk }} | head -70)
           DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//'%'/'%25'}"
           DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//$'\n'/'%0A'}"
           DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//$'\r'/'%0D'}"
           echo "::set-output name=diff_details::$DIFFUSE_OUTPUT"
+      
+      - name: Get workflow run job url
+        shell: bash
+        id: get_run_job_url
+        run: |-
+          workflowRunJobUrl=$(curl \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ inputs.github_token }}" \
+          "${{ github.api_url }}/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
+          | jq -M -r '.jobs[] | select(.name == "${{ github.job }}").html_url')
+          echo "::set-output name=workflow_run_job_url::$workflowRunJobUrl"      
 
       - name: Find Comment
         uses: peter-evans/find-comment@v2
@@ -71,4 +82,5 @@ runs:
             ```
             ${{ steps.diff_apk.outputs.diff_details }} 
             ```
+            More detailed logs can be found here --> ${{ steps.get_run_job_url.outputs.workflow_run_job_url }}
           edit-mode: replace
