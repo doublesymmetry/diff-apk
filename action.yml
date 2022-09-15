@@ -46,7 +46,7 @@ runs:
         id: diff_apk
         run: |-
           brew install JakeWharton/repo/diffuse
-          diffuse diff downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/*.apk ${{ inputs.new_apk }} | head -1000
+          diffuse diff downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/*.apk ${{ inputs.new_apk }} | head -200
           DIFFUSE_OUTPUT=$(diffuse diff downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/*.apk ${{ inputs.new_apk }} | head -70)
           DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//'%'/'%25'}"
           DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//$'\n'/'%0A'}"
