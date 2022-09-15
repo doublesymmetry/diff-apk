@@ -51,7 +51,7 @@ runs:
           DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//'%'/'%25'}"
           DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//$'\n'/'%0A'}"
           DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//$'\r'/'%0D'}"
-          echo "::set-output name=diff_details::$DIFFUSE_OUTPUT"
+           echo "::set-output name=diff_details::DIFFUSE_OUTPUT"
       
 #       - name: Get workflow run job url
 #         shell: bash
