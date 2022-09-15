@@ -46,41 +46,41 @@ runs:
         id: diff_apk
         run: |-
           brew install JakeWharton/repo/diffuse
-          diffuse diff downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/*.apk ${{ inputs.new_apk }}
+          diffuse diff downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/*.apk ${{ inputs.new_apk }} | head -1000
           DIFFUSE_OUTPUT=$(diffuse diff downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/*.apk ${{ inputs.new_apk }} | head -70)
           DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//'%'/'%25'}"
           DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//$'\n'/'%0A'}"
           DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//$'\r'/'%0D'}"
           echo "::set-output name=diff_details::$DIFFUSE_OUTPUT"
       
-      - name: Get workflow run job url
-        shell: bash
-        id: get_run_job_url
-        run: |-
-          workflowRunJobUrl=$(curl \
-          -H "Accept: application/vnd.github+json" \
-          -H "Authorization: Bearer ${{ inputs.github_token }}" \
-          "${{ github.api_url }}/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
-          | jq -M -r '.jobs[] | select(.name == "${{ github.job }}").html_url')
-          echo "::set-output name=workflow_run_job_url::$workflowRunJobUrl"      
+#       - name: Get workflow run job url
+#         shell: bash
+#         id: get_run_job_url
+#         run: |-
+#           workflowRunJobUrl=$(curl \
+#           -H "Accept: application/vnd.github+json" \
+#           -H "Authorization: Bearer ${{ inputs.github_token }}" \
+#           "${{ github.api_url }}/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
+#           | jq -M -r '.jobs[] | select(.name == "${{ github.job }}").html_url')
+#           echo "::set-output name=workflow_run_job_url::$workflowRunJobUrl"      
 
-      - name: Find Comment
-        uses: peter-evans/find-comment@v2
-        id: fc
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: APK Diff Details
+#       - name: Find Comment
+#         uses: peter-evans/find-comment@v2
+#         id: fc
+#         with:
+#           issue-number: ${{ github.event.pull_request.number }}
+#           comment-author: 'github-actions[bot]'
+#           body-includes: APK Diff Details
 
-      - name: Create or update comment
-        uses: peter-evans/create-or-update-comment@v2
-        with:
-          comment-id: ${{ steps.fc.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            APK Diff Details
-            ```
-            ${{ steps.diff_apk.outputs.diff_details }} 
-            ```
-            More detailed logs can be found here --> ${{ steps.get_run_job_url.outputs.workflow_run_job_url }}
-          edit-mode: replace
+#       - name: Create or update comment
+#         uses: peter-evans/create-or-update-comment@v2
+#         with:
+#           comment-id: ${{ steps.fc.outputs.comment-id }}
+#           issue-number: ${{ github.event.pull_request.number }}
+#           body: |
+#             APK Diff Details
+#             ```
+#             ${{ steps.diff_apk.outputs.diff_details }} 
+#             ```
+#             More detailed logs can be found here --> ${{ steps.get_run_job_url.outputs.workflow_run_job_url }}
+#           edit-mode: replace
