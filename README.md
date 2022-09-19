@@ -44,3 +44,6 @@ between the APKs and surfacing them.
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 ```
+
+## How does the comment look like?
+![Example PR comment with diffuse output](images/example-diff-output.png)
