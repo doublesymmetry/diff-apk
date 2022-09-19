@@ -46,4 +46,4 @@ between the APKs and surfacing them.
 ```
 
 ## How does the comment look like?
-[Example PR comment with diffuse output](images/example-diff-output.png)
+![Example PR comment with diffuse output](images/example-diff-output.png)
