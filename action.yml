@@ -27,7 +27,12 @@ runs:
       - name: Download APK
         shell: bash
         run: |-
-          ./brew_install jq
+          if brew list | (grep -q "jq"; ret=$?; cat >/dev/null; exit $ret); then
+            echo "jq is installed"
+          else
+            echo "jq is not installed, installing jq..."
+            brew install jq
+          fi
           artifactDownloadUrl=$(curl \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ inputs.github_token }}" \
@@ -45,7 +50,12 @@ runs:
         shell: bash
         id: diff_apk
         run: |-
-          ./brew_install JakeWharton/repo/diffuse
+          if brew list | (grep -q "JakeWharton/repo/diffuse"; ret=$?; cat >/dev/null; exit $ret); then
+            echo "diffuse is installed"
+          else
+            echo "diffuse is not installed, installing diffuse..."
+            brew install JakeWharton/repo/diffuse
+          fi
           diffuse diff downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/*.apk ${{ inputs.new_apk }}
           DIFFUSE_OUTPUT=$(diffuse diff downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/*.apk ${{ inputs.new_apk }} | sed -n '/====   DEX   ====/q;p')
           DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//'%'/'%25'}"
