@@ -17,7 +17,7 @@ runs:
         id: old_apk_sha
         run: |-
           git fetch origin main
-          echo "::set-output name=old_apk_sha::$(git merge-base --all ${{ github.event.pull_request.head.sha }} origin/main)"      
+          echo "old_apk_sha=$(git merge-base --all ${{ github.event.pull_request.head.sha }} origin/main)" >> $GITHUB_OUTPUT
 
       - name: Logging branch off SHA
         shell: bash
@@ -54,10 +54,7 @@ runs:
           fi
           diffuse diff downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/*.apk ${{ inputs.new_apk }}
           DIFFUSE_OUTPUT=$(diffuse diff downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/*.apk ${{ inputs.new_apk }} | sed -n '/====   DEX   ====/q;p')
-          DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//'%'/'%25'}"
-          DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//$'\n'/'%0A'}"
-          DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//$'\r'/'%0D'}"
-          echo "::set-output name=diff_details::$DIFFUSE_OUTPUT"
+          echo "diff_details=$DIFFUSE_OUTPUT" >> $GITHUB_OUTPUT
       
       - name: Get workflow run job url
         shell: bash
@@ -68,7 +65,7 @@ runs:
           -H "Authorization: Bearer ${{ inputs.github_token }}" \
           "${{ github.api_url }}/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
           | jq -M -r '.jobs[] | select(.name == "${{ github.job }}").html_url')
-          echo "::set-output name=workflow_run_job_url::$workflowRunJobUrl"      
+          echo "workflow_run_job_url=$workflowRunJobUrl" >> $GITHUB_OUTPUT
 
       - name: Find Comment
         uses: peter-evans/find-comment@v2

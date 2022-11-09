@@ -1,5 +1,5 @@
 # diff-apk
-A github action to view the impact of a code change on the apk. 
+A github action to view the impact of a code change on an android app, currently only runs on macOS runners.
 
 ## How does it work?
 diff-apk does a few things:
