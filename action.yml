@@ -68,7 +68,7 @@ runs:
           -H "Authorization: Bearer ${{ inputs.github_token }}" \
           "${{ github.api_url }}/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
           | jq -M -r '.jobs[] | select(.name == "${{ github.job }}").html_url')
-          echo "workflow_run_job_url::$workflowRunJobUrl" >> $GITHUB_OUTPUT
+          echo "workflow_run_job_url=$workflowRunJobUrl" >> $GITHUB_OUTPUT
 
       - name: Find Comment
         uses: peter-evans/find-comment@v2
