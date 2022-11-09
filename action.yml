@@ -54,9 +54,6 @@ runs:
           fi
           diffuse diff downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/*.apk ${{ inputs.new_apk }}
           DIFFUSE_OUTPUT=$(diffuse diff downloads/apk/${{ steps.old_apk_sha.outputs.old_apk_sha }}/*.apk ${{ inputs.new_apk }} | sed -n '/====   DEX   ====/q;p')
-          DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//'%'/'%25'}"
-          DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//$'\n'/'%0A'}"
-          DIFFUSE_OUTPUT="${DIFFUSE_OUTPUT//$'\r'/'%0D'}"
           echo "diff_details=$DIFFUSE_OUTPUT" >> $GITHUB_OUTPUT
       
       - name: Get workflow run job url
