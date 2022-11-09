@@ -27,9 +27,7 @@ runs:
       - name: Download APK
         shell: bash
         run: |-
-          if brew list | (grep -q "jq"; ret=$?; cat >/dev/null; exit $ret); then
-            echo "jq is installed"
-          else
+          if ! [ -x "$(command -v jq)" ]; then
             echo "jq is not installed, installing jq..."
             brew install jq
           fi
@@ -50,9 +48,7 @@ runs:
         shell: bash
         id: diff_apk
         run: |-
-          if brew list | (grep -q "JakeWharton/repo/diffuse"; ret=$?; cat >/dev/null; exit $ret); then
-            echo "diffuse is installed"
-          else
+          if ! [ -x "$(command -v diffuse)" ]; then
             echo "diffuse is not installed, installing diffuse..."
             brew install JakeWharton/repo/diffuse
           fi
